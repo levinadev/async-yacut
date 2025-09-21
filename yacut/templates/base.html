@@ -16,7 +16,9 @@
   {% include 'header.html' %}
 
   <main class="container my-5">
-    {% block content %}{% endblock %}
+      <section class="container my-5 px-4">
+        {% block content %}{% endblock %}
+      </section>
   </main>
 
   {% include 'footer.html' %}
