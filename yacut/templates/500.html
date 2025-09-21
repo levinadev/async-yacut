@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block title %}Ошибка {{ error_code }} — YaCut{% endblock %}
+
+{% block content %}
+  <h1>Ошибка {{ error_code }}</h1>
+  <p>{{ message }}</p>
+{% endblock %}
