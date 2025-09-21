@@ -14,7 +14,7 @@ class URLMapForm(FlaskForm):
     )
     custom_id = StringField(
         'Сокращенная ссылка',
-        validators=[DataRequired(message='Обязательное поле'),
+        validators=[Optional(),
                     Length(1, 16)]
     )
 
