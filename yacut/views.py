@@ -41,7 +41,7 @@ def follow_link(short):
 
 
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/files', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         files = request.files.getlist("files")
