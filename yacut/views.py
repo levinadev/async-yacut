@@ -61,20 +61,13 @@ def follow_link(short):
     - Если запись найдена → выполняет redirect на оригинальную (длинную) ссылку.
     - Если запись не найдена → автоматически возвращает 404.
     """
-    print(f"Пришёл короткий идентификатор из URL: {short}")
     urlmap = URLMap.query.filter_by(short=short).first_or_404()
-    print(f"Нашли в БД: original={urlmap.original}, short={urlmap.short}")
     return redirect(urlmap.original)
 
 
 @app.route('/files', methods=['GET', 'POST'])
 def upload_file():
-    """
-    Загрузка файлов и генерация коротких ссылок на них.
-
-    - GET: просто отображаем форму загрузки.
-    - POST: обрабатываем загруженные файлы, создаём короткие ссылки, отображаем результаты.
-    """
+    """Загрузка файлов и генерация коротких ссылок на них."""
     if request.method == 'POST':
         results_to_display = []
 
@@ -85,25 +78,22 @@ def upload_file():
         loop.close()
 
         for r in results:
-            # генерируем уникальный short_id
+            # Генерируем уникальный short_id
             while URLMap.query.filter_by(short=r['short_id']).first():
                 r['short_id'] = get_unique_short_id()
 
-            # сохраняем в базу
+            # Сохраняем в базу
             urlmap = URLMap(original=r['url'], short=r['short_id'])
             db.session.add(urlmap)
             db.session.commit()
 
-            # добавляем в список для отображения
+            # Добавляем в список для отображения
             results_to_display.append({
                 "filename": r['filename'],
                 "short_url": url_for('follow_link', short=r['short_id'], _external=True)
             })
 
-        # POST → возвращаем страницу с результатами
+            print(f"Полученные файлы для скачивания: {results_to_display}")
+
         return render_template('upload.html', results=results_to_display)
-
-    # GET → просто форма, результатов пока нет
     return render_template('upload.html')
-
-
