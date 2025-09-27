@@ -70,41 +70,26 @@ def follow_link(short):
 @app.route('/files', methods=['GET', 'POST'])
 def upload_file():
     """
-    Обрабатывает загрузку файлов пользователем.
+    Загрузка файлов и генерация коротких ссылок на них.
 
-    GET-запрос: отображает страницу upload.html с формой для загрузки файлов.
-    POST-запрос:
-        1. Получает файлы из формы (input name="files").
-        2. Создаёт event loop и запускает асинхронную функцию async_upload_files_to_yandex.
-        3. Сохраняет короткие ссылки в базу данных.
-        4. Отображает страницу с уже загруженными файлами и всеми ссылками из базы.
+    - GET: просто отображаем форму загрузки.
+    - POST: обрабатываем загруженные файлы, создаём короткие ссылки, отображаем результаты.
     """
-    results_to_display = []
-
     if request.method == 'POST':
-        print("[INFO] Получен POST-запрос на /files")
-        files = request.files.getlist("files")
-        print(f"[DEBUG] Количество файлов: {len(files)}")
-        for f in files:
-            print(f"[DEBUG] Имя файла: {f.filename}")
+        results_to_display = []
 
-        # создаём новый event loop
+        files = request.files.getlist("files")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        print("[INFO] Event loop создан и установлен")
-
-        # асинхронная загрузка файлов на Яндекс
         results = loop.run_until_complete(async_upload_files_to_yandex(files))
-        print(f"[INFO] Загрузка завершена. Результаты: {results}")
         loop.close()
-        print("[INFO] Event loop закрыт")
 
-        # сохраняем результаты в базу
         for r in results:
-            # проверяем уникальность short_id
+            # генерируем уникальный short_id
             while URLMap.query.filter_by(short=r['short_id']).first():
                 r['short_id'] = get_unique_short_id()
 
+            # сохраняем в базу
             urlmap = URLMap(original=r['url'], short=r['short_id'])
             db.session.add(urlmap)
             db.session.commit()
@@ -112,10 +97,13 @@ def upload_file():
             # добавляем в список для отображения
             results_to_display.append({
                 "filename": r['filename'],
-                "short_url": url_for('follow_link', short=r['short_id'], _external=False)
+                "short_url": url_for('follow_link', short=r['short_id'], _external=True)
             })
 
-    # GET-запрос или после POST показываем страницу с результатами
-    all_links = URLMap.query.order_by(URLMap.timestamp.desc()).all()
+        # POST → возвращаем страницу с результатами
+        return render_template('upload.html', results=results_to_display)
 
-    return render_template('upload.html', results=results_to_display, all_links=all_links)
+    # GET → просто форма, результатов пока нет
+    return render_template('upload.html')
+
+

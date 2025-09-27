@@ -3,35 +3,18 @@
 {% block title %}Загрузка файлов — YaCut{% endblock %}
 
 {% block content %}
-    <h1>Загрузка файлов</h1>
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="files" multiple class="form-control mb-3">
-        <button type="submit" class="btn btn-success">Загрузить</button>
-    </form>
+<h1>Загрузка файлов</h1>
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="files" multiple class="form-control mb-3">
+    <button type="submit" class="btn btn-success">Загрузить</button>
+</form>
 
-    {% if results %}
-        <h2>Загруженные файлы</h2>
-        <ul>
-            {% for r in results %}
-                {% if r.filename and r.short_url %}
-                    <li>{{ r.filename }} — <a href="{{ r.short_url }}">{{ r.short_url }}</a></li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% if all_links %}
-        <h2>Все ссылки</h2>
-        <ul>
-            {% for link in all_links %}
-                {% if link.original and link.short %}
-                    <li>
-                        {{ link.original.split('/')[-1] }} —
-                        <a href="{{ url_for('follow_link', short=link.short) }}">{{ link.short }}</a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    {% endif %}
-
+{% if results %}
+<h2>Загруженные файлы</h2>
+<ul>
+    {% for r in results %}
+    <li>{{ r.filename }} — <a href="{{ r.short_url }}">{{ r.short_url }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock %}
