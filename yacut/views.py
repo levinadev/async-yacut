@@ -1,13 +1,28 @@
-from flask import render_template, request, redirect, url_for
-from . import app
-
+import asyncio
 from flask import render_template, request, redirect, url_for, flash
 from . import app, db
 from .models import URLMap
 from .utils import get_unique_short_id
+from .yandex import async_upload_files_to_yandex
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    """
+    Главная страница (сокращатель ссылок).
+
+    param: request.form — original_link, custom_id
+    return: render_template('index.html', short_url=<короткая ссылка> или error=<сообщение>)
+
+    Шаги:
+    1. При GET — возвращает форму для ввода ссылки.
+    2. При POST:
+       - Проверяет наличие длинной ссылки.
+       - Генерирует short_id, если пользователь не указал.
+       - Проверяет уникальность short_id.
+       - Сохраняет в базе URLMap.
+       - Возвращает шаблон с готовой короткой ссылкой или ошибкой.
+    """
     if request.method == "POST":
         original = request.form.get("original_link")
         custom_id = request.form.get("custom_id")
@@ -15,15 +30,12 @@ def index():
         if not original:
             return render_template("index.html", error="Укажите длинную ссылку.")
 
-        # если пользователь не ввёл свой идентификатор → генерируем
         if not custom_id:
             custom_id = get_unique_short_id()
 
-        # проверим, не занят ли идентификатор
         if URLMap.query.filter_by(short=custom_id).first():
             return render_template("index.html", error="Предложенный вариант короткой ссылки уже существует.")
 
-        # создаём и сохраняем в БД
         urlmap = URLMap(original=original, short=custom_id)
         db.session.add(urlmap)
         db.session.commit()
@@ -36,25 +48,63 @@ def index():
 
 @app.route("/<string:short>")
 def follow_link(short):
+    """
+    Переход по короткой ссылке.
+
+    param: short — короткий идентификатор из URL
+    return: redirect(<оригинальная ссылка>) или 404, если нет записи
+
+    Шаги:
+    1. Ищет запись по short_id в базе (URLMap).
+    2. Если запись есть — редирект на оригинальную ссылку.
+    3. Если записи нет — возвращает 404.
+    """
     urlmap = URLMap.query.filter_by(short=short).first_or_404()
     return redirect(urlmap.original)
 
 
-
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/files', methods=['GET', 'POST'])
 def upload_file():
+    """
+    Загрузка файлов на Яндекс.Диск и создание коротких ссылок.
+
+    param: request.files — список загруженных файлов
+    return: render_template('upload.html', results=<список файлов с short_url>)
+
+    Шаги:
+    1. При GET — возвращает форму для загрузки файлов.
+    2. При POST:
+       - Получает файлы из формы.
+       - Создаёт и запускает асинхронный loop для загрузки файлов на Яндекс.Диск.
+       - Асинхронно загружает каждый файл и получает прямую ссылку.
+       - Генерирует уникальный short_id для каждого файла и сохраняет в базе (URLMap).
+       - Формирует список результатов для отображения на шаблоне.
+       - Рендерит upload.html с результатами.
+    """
     if request.method == 'POST':
+
+        results_to_display = []
+
         files = request.files.getlist("files")
-        for f in files:
-            print("Загружен файл:", f.filename)
-        return redirect(url_for('success'))
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(async_upload_files_to_yandex(files))
+        loop.close()
+
+        for r in results:
+            while URLMap.query.filter_by(short=r['short_id']).first():
+                r['short_id'] = get_unique_short_id()
+
+            urlmap = URLMap(original=r['url'], short=r['short_id'])
+            db.session.add(urlmap)
+            db.session.commit()
+
+            results_to_display.append({
+                "filename": r['filename'],
+                "short_url": url_for('follow_link', short=r['short_id'], _external=True)
+            })
+
+        return render_template('upload.html', results=results_to_display)
+
     return render_template('upload.html')
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html', error_code=404, message="Страница не найдена"), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    return render_template('500.html', error_code=500, message="Ошибка сервера"), 500
