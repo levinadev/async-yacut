@@ -67,33 +67,34 @@ def follow_link(short):
 
 @app.route('/files', methods=['GET', 'POST'])
 def upload_file():
-    """Загрузка файлов и генерация коротких ссылок на них."""
     if request.method == 'POST':
         results_to_display = []
 
         files = request.files.getlist("files")
+        print(f"⭐️Файлы пришли от клиента: {[f.filename for f in files]}")
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         results = loop.run_until_complete(async_upload_files_to_yandex(files))
         loop.close()
 
         for r in results:
-            # Генерируем уникальный short_id
             while URLMap.query.filter_by(short=r['short_id']).first():
                 r['short_id'] = get_unique_short_id()
 
-            # Сохраняем в базу
             urlmap = URLMap(original=r['url'], short=r['short_id'])
             db.session.add(urlmap)
             db.session.commit()
 
-            # Добавляем в список для отображения
             results_to_display.append({
                 "filename": r['filename'],
                 "short_url": url_for('follow_link', short=r['short_id'], _external=True)
             })
 
-            print(f"Полученные файлы для скачивания: {results_to_display}")
+            print(f"⭐️⭐️Файл загружен: {r['filename']}, ссылка: {r['url']}")
 
+        print(f"⭐️⭐️⭐️Все результаты для отображения: {results_to_display}")
         return render_template('upload.html', results=results_to_display)
+
     return render_template('upload.html')
+

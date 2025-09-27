@@ -10,7 +10,7 @@
 </form>
 
 {% if results %}
-<h2>Загруженные файлы</h2>
+
 <ul>
     {% for r in results %}
     <li>{{ r.filename }} — <a href="{{ r.url }}" download>{{ r.filename }}</a></li>

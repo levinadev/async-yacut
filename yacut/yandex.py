@@ -21,6 +21,7 @@ app = Flask(__name__)
 
 async def upload_file_and_get_url(session, file):
     """Загрузить один файл на Яндекс.Диск и вернуть короткую ссылку + прямую ссылку"""
+    print(f"🌹Начинаем загрузку файла: {file.filename}")
     path = f'app:/{file.filename}'
 
     # Получаем upload_href
@@ -46,6 +47,7 @@ async def upload_file_and_get_url(session, file):
         data = await resp.json()
         direct_url = data['href']
 
+    print(f"🌹Файл загружен на Яндекс.Диск: {file.filename}, ссылка: {direct_url}")
     # Генерируем короткий id
     short_id = get_unique_short_id()
     return {"filename": file.filename, "short_id": short_id, "url": direct_url}
