@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for
 from . import app
-
+import asyncio
 from flask import render_template, request, redirect, url_for, flash
 from . import app, db
 from .models import URLMap
@@ -45,11 +45,10 @@ def follow_link(short):
 def upload_file():
     if request.method == 'POST':
         files = request.files.getlist("files")
-        for f in files:
-            print("Загружен файл:", f.filename)
-        return redirect(url_for('success'))
+        results = asyncio.run(async_upload_files_to_yandex(files))
+        # выводим список коротких ссылок на экран
+        return render_template('upload_result.html', results=results)
     return render_template('upload.html')
-
 
 @app.errorhandler(404)
 def page_not_found(e):
