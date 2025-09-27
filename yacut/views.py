@@ -5,6 +5,8 @@ from flask import render_template, request, redirect, url_for, flash
 from . import app, db
 from .models import URLMap
 from .utils import get_unique_short_id
+from .yandex import async_upload_files_to_yandex
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -40,19 +42,24 @@ def follow_link(short):
     return redirect(urlmap.original)
 
 
-
 @app.route('/files', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         files = request.files.getlist("files")
-        results = asyncio.run(async_upload_files_to_yandex(files))
-        # выводим список коротких ссылок на экран
-        return render_template('upload_result.html', results=results)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(async_upload_files_to_yandex(files))
+        loop.close()
+        # просто рендерим ту же страницу и передаём results
+        return render_template('upload.html', results=results)
     return render_template('upload.html')
+
+
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', error_code=404, message="Страница не найдена"), 404
+
 
 @app.errorhandler(500)
 def internal_error(e):

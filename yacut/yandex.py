@@ -23,9 +23,9 @@ app = Flask(__name__)
 # -------------------------------
 # Асинхронная загрузка на Яндекс Диск
 # -------------------------------
-async def upload_file_and_get_url(session, filename: str):
-    """Загрузить локальный файл на Яндекс Диск и вернуть ссылку для скачивания."""
-    path = f'app:/{filename}'
+async def upload_file_and_get_url(session, file):
+    """Загрузить один файл на Яндекс.Диск и вернуть короткую ссылку + прямую ссылку"""
+    path = f'app:/{file.filename}'
 
     # 1. Получаем upload_href
     async with session.get(
@@ -36,13 +36,12 @@ async def upload_file_and_get_url(session, filename: str):
         data = await resp.json()
         upload_href = data['href']
 
-    # 2. Загружаем файл
-    with open(filename, "rb") as f:
-        async with session.put(upload_href, data=f) as resp:
-            if resp.status not in (201, 202):
-                raise Exception(f"Ошибка загрузки файла {filename}, статус {resp.status}")
+    # 2. Загружаем содержимое файла
+    async with session.put(upload_href, data=file.read()) as resp:
+        if resp.status not in (201, 202):
+            raise Exception(f"Ошибка загрузки файла {file.filename}, статус {resp.status}")
 
-    # 3. Получаем download_href
+    # 3. Получаем прямую ссылку
     async with session.get(
         DOWNLOAD_URL,
         headers=AUTH_HEADERS,
@@ -53,8 +52,19 @@ async def upload_file_and_get_url(session, filename: str):
 
     # 4. Генерируем короткий id
     short_id = get_unique_short_id()
-    return {"filename": filename, "short_id": short_id, "url": direct_url}
+    return {"filename": file.filename, "short_id": short_id, "url": direct_url}
 
+
+async def async_upload_files_to_yandex(files):
+    """Асинхронная загрузка списка файлов"""
+    if files:
+        tasks = []
+        async with aiohttp.ClientSession() as session:
+            for f in files:
+                tasks.append(asyncio.ensure_future(upload_file_and_get_url(session, f)))
+            results = await asyncio.gather(*tasks)
+        return results
+    return []
 
 async def main():
     async with aiohttp.ClientSession() as session:
