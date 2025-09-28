@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+import re
+
+from flask import jsonify, request
+
 from . import app, db
 from .models import URLMap
 from .utils import get_unique_short_id
-import re
 
-ALLOWED_CUSTOM_ID = re.compile(r'^[A-Za-z0-9]+$')
+ALLOWED_CUSTOM_ID = re.compile(r"^[A-Za-z0-9]+$")
 
 
 @app.route("/api/id/", methods=["POST"])
@@ -21,19 +23,27 @@ def create_short_link():
         return jsonify({"message": "Отсутствует тело запроса"}), 400
 
     if "url" not in data:
-        return jsonify({"message": "\"url\" является обязательным полем!"}), 400
+        return jsonify({"message": '"url" является обязательным полем!'}), 400
 
     original = data["url"]
     custom_id = data.get("custom_id")
 
     if custom_id:
         if len(custom_id) > 16 or not ALLOWED_CUSTOM_ID.match(custom_id):
-            return jsonify({"message": "Указано недопустимое имя для короткой ссылки"}), 400
+            return (
+                jsonify({"message": "Указано недопустимое имя для короткой ссылки"}),
+                400,
+            )
     else:
         custom_id = get_unique_short_id()
 
     if URLMap.query.filter_by(short=custom_id).first():
-        return jsonify({"message": "Предложенный вариант короткой ссылки уже существует."}), 400
+        return (
+            jsonify(
+                {"message": "Предложенный вариант короткой ссылки уже существует."}
+            ),
+            400,
+        )
 
     urlmap = URLMap(original=original, short=custom_id)
     db.session.add(urlmap)
