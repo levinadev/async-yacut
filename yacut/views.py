@@ -20,13 +20,16 @@ def index():
         custom_id = request.form.get("custom_id")
 
         if not original:
-            return render_template("index.html", error="Укажите длинную ссылку.")
+            return render_template(
+                "index.html",
+                error="Укажите длинную ссылку.",
+            )
 
         if custom_id:
             if len(custom_id) > 16:
                 return render_template(
                     "index.html",
-                    error=("Длина короткой ссылки не должна " "превышать 16 символов."),
+                    error=("Длина короткой ссылки не должна превышать 16 символов."),
                 )
             if not ALLOWED_CUSTOM_ID.match(custom_id):
                 return render_template(

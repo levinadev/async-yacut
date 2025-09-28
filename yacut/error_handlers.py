@@ -8,7 +8,11 @@ def not_found_error(error):
     if "/api/" in str(error):
         return jsonify({"message": "Ресурс не найден"}), 404
     return (
-        render_template("404.html", error_code=404, message="Страница не найдена"),
+        render_template(
+            "404.html",
+            error_code=404,
+            message="Страница не найдена",
+        ),
         404,
     )
 
