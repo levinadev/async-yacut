@@ -4,6 +4,10 @@ from . import app, db
 from .models import URLMap
 from .utils import get_unique_short_id
 from .yandex import async_upload_files_to_yandex
+import re
+
+ALLOWED_CUSTOM_ID = re.compile(r'^[A-Za-z0-9]+$')
+RESERVED_SHORTS = ['files', 'api', 'admin']
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -30,16 +34,16 @@ def index():
         if not original:
             return render_template("index.html", error="Укажите длинную ссылку.")
 
-        if not custom_id:
+        if custom_id:
+            if len(custom_id) > 16:
+                return render_template("index.html", error="Длина короткой ссылки не должна превышать 16 символов.")
+            if not ALLOWED_CUSTOM_ID.match(custom_id):
+                return render_template("index.html",
+                                       error="Короткая ссылка может содержать только латинские буквы и цифры.")
+        else:
             custom_id = get_unique_short_id()
 
-        if custom_id and len(custom_id) > 16:
-            return render_template(
-                "index.html",
-                error="Пользовательский вариант короткой ссылки не может быть длиннее 16 символов."
-            )
-
-        if URLMap.query.filter_by(short=custom_id).first():
+        if custom_id in RESERVED_SHORTS or URLMap.query.filter_by(short=custom_id).first():
             return render_template("index.html", error="Предложенный вариант короткой ссылки уже существует.")
 
         urlmap = URLMap(original=original, short=custom_id)
