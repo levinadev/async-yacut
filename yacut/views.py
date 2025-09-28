@@ -45,7 +45,7 @@ def index():
         ):
             return render_template(
                 "index.html",
-                error=("Предложенный вариант короткой" " ссылки уже существует."),
+                error=("Предложенный вариант короткой ссылки уже существует."),
             )
 
         urlmap = URLMap(original=original, short=custom_id)
