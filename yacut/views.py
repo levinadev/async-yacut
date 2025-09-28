@@ -14,38 +14,33 @@ RESERVED_SHORTS = ["files", "api", "admin"]
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    """
-    Главная страница (сокращатель ссылок).
-
-    param: request.form — original_link, custom_id
-    return: render_template('index.html', short_url=<короткая ссылка> или error=<сообщение>)
-
-    Шаги:
-    1. При GET — возвращает форму для ввода ссылки.
-    2. При POST:
-       - Проверяет наличие длинной ссылки.
-       - Генерирует short_id, если пользователь не указал.
-       - Проверяет уникальность short_id.
-       - Сохраняет в базе URLMap.
-       - Возвращает шаблон с готовой короткой ссылкой или ошибкой.
-    """
+    """Главная страница."""
     if request.method == "POST":
         original = request.form.get("original_link")
         custom_id = request.form.get("custom_id")
 
         if not original:
-            return render_template("index.html", error="Укажите длинную ссылку.")
+            return render_template(
+                "index.html",
+                error="Укажите длинную ссылку.",
+            )
 
         if custom_id:
             if len(custom_id) > 16:
                 return render_template(
                     "index.html",
-                    error="Длина короткой ссылки не должна превышать 16 символов.",
+                    error=(
+                        "Длина короткой ссылки не "
+                        "должна превышать 16 символов."
+                    ),
                 )
             if not ALLOWED_CUSTOM_ID.match(custom_id):
                 return render_template(
                     "index.html",
-                    error="Короткая ссылка может содержать только латинские буквы и цифры.",
+                    error=(
+                        "Короткая ссылка может содержать только "
+                        "латинские буквы и цифры."
+                    ),
                 )
         else:
             custom_id = get_unique_short_id()
@@ -56,7 +51,7 @@ def index():
         ):
             return render_template(
                 "index.html",
-                error="Предложенный вариант короткой ссылки уже существует.",
+                error=("Предложенный вариант короткой ссылки уже существует."),
             )
 
         urlmap = URLMap(original=original, short=custom_id)
@@ -71,17 +66,7 @@ def index():
 
 @app.route("/<string:short>")
 def follow_link(short):
-    """
-    Переход по короткой ссылке.
-
-    param: short — короткий идентификатор из URL
-    return: redirect(<оригинальная ссылка>) или 404, если нет записи
-
-    Шаги:
-    1. Ищет запись по short_id в базе (URLMap).
-    2. Если запись есть — редирект на оригинальную ссылку.
-    3. Если записи нет — возвращает 404.
-    """
+    """Переход по короткой ссылке."""
     urlmap = URLMap.query.filter_by(short=short).first_or_404()
     return redirect(urlmap.original)
 
@@ -89,20 +74,8 @@ def follow_link(short):
 @app.route("/files", methods=["GET", "POST"])
 def upload_file():
     """
-    Загрузка файлов на Яндекс.Диск и создание коротких ссылок.
-
-    param: request.files — список загруженных файлов
-    return: render_template('upload.html', results=<список файлов с short_url>)
-
-    Шаги:
-    1. При GET — возвращает форму для загрузки файлов.
-    2. При POST:
-       - Получает файлы из формы.
-       - Создаёт и запускает асинхронный loop для загрузки файлов на Яндекс.Диск.
-       - Асинхронно загружает каждый файл и получает прямую ссылку.
-       - Генерирует уникальный short_id для каждого файла и сохраняет в базе (URLMap).
-       - Формирует список результатов для отображения на шаблоне.
-       - Рендерит upload.html с результатами.
+    Загрузка файлов на Яндекс.Диск
+    и создание коротких ссылок.
     """
     if request.method == "POST":
 

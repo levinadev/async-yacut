@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, MultipleFileField
-from wtforms import StringField, SubmitField, TextAreaField, URLField
+from flask_wtf.file import MultipleFileField
+from wtforms import StringField
 from wtforms.validators import DataRequired, Length, Optional
 
 
@@ -8,7 +8,8 @@ class URLMapForm(FlaskForm):
     """Форма для главной страницы."""
 
     original_link = StringField(
-        "Оригинальная ссылка", validators=[DataRequired(message="Обязательное поле")]
+        "Оригинальная ссылка",
+        validators=[DataRequired(message="Обязательное поле")],
     )
     custom_id = StringField(
         "Сокращенная ссылка", validators=[Optional(), Length(1, 16)]
