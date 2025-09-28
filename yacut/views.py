@@ -33,6 +33,12 @@ def index():
         if not custom_id:
             custom_id = get_unique_short_id()
 
+        if custom_id and len(custom_id) > 16:
+            return render_template(
+                "index.html",
+                error="Пользовательский вариант короткой ссылки не может быть длиннее 16 символов."
+            )
+
         if URLMap.query.filter_by(short=custom_id).first():
             return render_template("index.html", error="Предложенный вариант короткой ссылки уже существует.")
 
