@@ -24,12 +24,12 @@ def create_short_link():
 
     if custom_id:
         if not ALLOWED_CUSTOM_ID.match(custom_id):
-            return jsonify({"message": "Указано недопустимое имя для короткой ссылки"}), 400
+            return jsonify({"message": "Указано недопустимое имя для короткой ссылки."}), 400
     else:
         custom_id = get_unique_short_id()
 
     if URLMap.query.filter_by(short=custom_id).first():
-        return jsonify({"message": "Короткий идентификатор уже занят"}), 409
+        return jsonify({"message": "Предложенный вариант короткой ссылки уже существует."}), 400
 
     urlmap = URLMap(original=original, short=custom_id)
     db.session.add(urlmap)
@@ -48,6 +48,6 @@ def get_original_url(short_id):
     """
     urlmap = URLMap.query.filter_by(short=short_id).first()
     if not urlmap:
-        return jsonify({"error": "Короткая ссылка не найдена"}), 404
+        return jsonify({"error": "Короткая ссылка не найдена."}), 404
 
     return jsonify({"url": urlmap.original})
