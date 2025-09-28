@@ -17,4 +17,7 @@ def not_found_error(error):
 def internal_error(error):
     if "/api/" in str(error):
         return jsonify({"message": "Внутренняя ошибка сервера"}), 500
-    return render_template("500.html", error_code=500, message="Ошибка на сервере"), 500
+    return (
+        render_template("500.html", error_code=500, message="Ошибка на сервере"),
+        500,
+    )

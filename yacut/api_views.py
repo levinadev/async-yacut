@@ -11,12 +11,6 @@ ALLOWED_CUSTOM_ID = re.compile(r"^[A-Za-z0-9]+$")
 
 @app.route("/api/id/", methods=["POST"])
 def create_short_link():
-    """
-    POST /api/id/
-    body JSON: {"url": "длинная ссылка", "custom_id": "опционально короткий id"}
-
-    return JSON: {"url": "<длинная ссылка>", "short_link": "<короткая ссылка>"}
-    """
     data = request.get_json(silent=True)
 
     if not data:
@@ -40,7 +34,7 @@ def create_short_link():
     if URLMap.query.filter_by(short=custom_id).first():
         return (
             jsonify(
-                {"message": "Предложенный вариант короткой ссылки уже существует."}
+                {"message": "Предложенный вариант " "короткой ссылки уже существует."}
             ),
             400,
         )
@@ -55,11 +49,6 @@ def create_short_link():
 
 @app.route("/api/id/<string:short_id>/", methods=["GET"])
 def get_original_url(short_id):
-    """
-    GET /api/id/<short_id>/
-
-    return JSON: {"url": "<длинная ссылка>"}
-    """
     urlmap = URLMap.query.filter_by(short=short_id).first()
 
     if not urlmap:
