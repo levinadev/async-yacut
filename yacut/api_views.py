@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from . import app, db
 from .models import URLMap
 from .utils import get_unique_short_id
+import re
+
+ALLOWED_CUSTOM_ID = re.compile(r'^[A-Za-z0-9]+$')
 
 
 @app.route("/api/id/", methods=["POST"])
@@ -19,7 +22,10 @@ def create_short_link():
     original = data["url"]
     custom_id = data.get("custom_id")
 
-    if not custom_id:
+    if custom_id:
+        if not ALLOWED_CUSTOM_ID.match(custom_id):
+            return jsonify({"message": "Указано недопустимое имя для короткой ссылки"}), 400
+    else:
         custom_id = get_unique_short_id()
 
     if URLMap.query.filter_by(short=custom_id).first():
