@@ -22,11 +22,14 @@ app = Flask(__name__)
 
 
 async def upload_file_and_get_url(session, file):
-    """Загрузить один файл на Яндекс.Диск и вернуть короткую ссылку + прямую ссылку"""
+    """Загрузить один файл на Яндекс.Диск
+    и вернуть короткую ссылку + прямую ссылку"""
     path = f"app:/{file.filename}"
 
     async with session.get(
-        UPLOAD_URL, headers=AUTH_HEADERS, params={"path": path, "overwrite": "true"}
+        UPLOAD_URL,
+        headers=AUTH_HEADERS,
+        params={"path": path, "overwrite": "true"},
     ) as resp:
         data = await resp.json()
         upload_href = data["href"]
@@ -53,7 +56,9 @@ async def async_upload_files_to_yandex(files):
         tasks = []
         async with aiohttp.ClientSession() as session:
             for f in files:
-                tasks.append(asyncio.ensure_future(upload_file_and_get_url(session, f)))
+                tasks.append(
+                    asyncio.ensure_future(
+                        upload_file_and_get_url(session, f)))
             results = await asyncio.gather(*tasks)
 
         return results
