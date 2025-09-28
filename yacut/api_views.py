@@ -17,7 +17,7 @@ def create_short_link():
     """
     data = request.get_json(silent=True)
     if not data or "url" not in data:
-        return jsonify({"message": "Отсутствует тело запроса"}), 400
+        return jsonify({"message": "\"url\" является обязательным полем!"}), 400
 
     original = data["url"]
     custom_id = data.get("custom_id")
