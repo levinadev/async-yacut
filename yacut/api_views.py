@@ -16,7 +16,11 @@ def create_short_link():
     return JSON: {"url": "<длинная ссылка>", "short_link": "<короткая ссылка>"}
     """
     data = request.get_json(silent=True)
-    if not data or "url" not in data:
+
+    if not data:
+        return jsonify({"message": "Отсутствует тело запроса"}), 400
+
+    if "url" not in data:
         return jsonify({"message": "\"url\" является обязательным полем!"}), 400
 
     original = data["url"]
