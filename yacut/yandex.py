@@ -9,9 +9,9 @@ from yacut.utils import get_unique_short_id
 
 load_dotenv()
 
-API_HOST = os.environ.get("API_HOST")
-API_VERSION = os.environ.get("API_VERSION")
-DISK_TOKEN = os.environ.get("DISK_TOKEN")
+API_HOST = os.environ.get("API_HOST", "https://cloud-api.yandex.net")
+API_VERSION = os.environ.get("API_VERSION", "/v1")
+DISK_TOKEN = os.environ.get("DISK_TOKEN", "mock_token")
 
 AUTH_HEADERS = {"Authorization": f"OAuth {DISK_TOKEN}"}
 
