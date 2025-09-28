@@ -13,8 +13,9 @@
 
         <ul>
             {% for r in results %}
-                <li>{{ r.filename }} — <a href="{{ r.url }}" download>{{ r.filename }}</a></li>
+                <li>{{ r.filename }} — <a href="{{ r.url }}" download>{{ r.short_url }}</a></li>
             {% endfor %}
         </ul>
+
     {% endif %}
 {% endblock %}
