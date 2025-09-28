@@ -56,7 +56,9 @@ async def async_upload_files_to_yandex(files):
         tasks = []
         async with aiohttp.ClientSession() as session:
             for f in files:
-                tasks.append(asyncio.ensure_future(upload_file_and_get_url(session, f)))
+                tasks.append(
+                    asyncio.ensure_future(
+                        upload_file_and_get_url(session, f)))
             results = await asyncio.gather(*tasks)
 
         return results

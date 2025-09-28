@@ -29,7 +29,10 @@ def index():
             if len(custom_id) > 16:
                 return render_template(
                     "index.html",
-                    error=("Длина короткой ссылки не должна превышать 16 символов."),
+                    error=(
+                        "Длина короткой ссылки не "
+                        "должна превышать 16 символов."
+                    ),
                 )
             if not ALLOWED_CUSTOM_ID.match(custom_id):
                 return render_template(
