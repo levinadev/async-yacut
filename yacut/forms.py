@@ -3,9 +3,10 @@ from flask_wtf.file import MultipleFileField
 from wtforms import StringField
 from wtforms.validators import DataRequired, Length, Optional
 
-# Константы для валидации
-CUSTOM_ID_MIN_LENGTH = 1
-CUSTOM_ID_MAX_LENGTH = 16
+from constants import (
+    CUSTOM_ID_MIN_LENGTH,
+    CUSTOM_ID_MAX_LENGTH
+)
 
 
 class URLMapForm(FlaskForm):
