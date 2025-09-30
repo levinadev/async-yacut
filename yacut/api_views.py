@@ -1,14 +1,14 @@
-from flask import jsonify, request
 from http import HTTPStatus
 
-from . import app, db
-from .models import URLMap
-from .utils import get_unique_short_id
+from flask import jsonify, request
 
 from constants import (
     CUSTOM_ID_ALLOWED_PATTERN,
     CUSTOM_ID_MAX_LENGTH,
 )
+from . import app, db
+from .models import URLMap
+from .utils import get_unique_short_id
 
 
 @app.route("/api/id/", methods=["POST"])

@@ -1,6 +1,8 @@
+from http import HTTPStatus
+
 import asyncio
 import aiohttp
-from http import HTTPStatus
+
 from settings import Config
 from yacut.utils import get_unique_short_id
 
