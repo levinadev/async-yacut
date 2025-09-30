@@ -7,4 +7,3 @@ class Config(object):
     DISK_TOKEN = os.getenv('DISK_TOKEN')
     API_HOST = os.getenv('API_HOST', 'https://cloud-api.yandex.net')
     API_VERSION = os.getenv('API_VERSION', '/v1')
-
