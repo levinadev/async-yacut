@@ -2,16 +2,15 @@ import asyncio
 
 from flask import redirect, render_template, request, url_for
 
-from . import app, db
-from .models import URLMap
-from .utils import get_unique_short_id
-from .yandex import async_upload_files_to_yandex
-
 from constants import (
     CUSTOM_ID_MAX_LENGTH,
     CUSTOM_ID_ALLOWED_PATTERN,
     CUSTOM_ID_RESERVED,
 )
+from . import app, db
+from .models import URLMap
+from .utils import get_unique_short_id
+from .yandex import async_upload_files_to_yandex
 
 
 @app.route("/", methods=["GET", "POST"])
