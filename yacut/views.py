@@ -13,6 +13,7 @@ from constants import (
     CUSTOM_ID_RESERVED,
 )
 
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     """Главная страница."""
@@ -47,8 +48,8 @@ def index():
             custom_id = get_unique_short_id()
 
         if (
-            custom_id in CUSTOM_ID_RESERVED
-            or URLMap.query.filter_by(short=custom_id).first()
+                custom_id in CUSTOM_ID_RESERVED
+                or URLMap.query.filter_by(short=custom_id).first()
         ):
             return render_template(
                 "index.html",

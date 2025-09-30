@@ -10,6 +10,7 @@ from constants import (
     CUSTOM_ID_MAX_LENGTH,
 )
 
+
 @app.route("/api/id/", methods=["POST"])
 def create_short_link():
     data = request.get_json(silent=True)
@@ -26,11 +27,19 @@ def create_short_link():
     custom_id = data.get("custom_id")
 
     if custom_id:
-        if (len(custom_id) > CUSTOM_ID_MAX_LENGTH or not
-        CUSTOM_ID_ALLOWED_PATTERN.match(custom_id)):
+        if (
+                len(custom_id) > CUSTOM_ID_MAX_LENGTH
+                or not CUSTOM_ID_ALLOWED_PATTERN.match(custom_id)
+        ):
             return (
-                jsonify({"message": "Указано недопустимое "
-                                    "имя для короткой ссылки"}),
+                jsonify(
+                    {
+                        "message": (
+                            "Указано недопустимое "
+                            "имя для короткой ссылки"
+                        )
+                    }
+                ),
                 HTTPStatus.BAD_REQUEST,
             )
     else:
