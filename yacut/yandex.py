@@ -1,24 +1,12 @@
 import asyncio
-import os
-
 import aiohttp
-from dotenv import load_dotenv
-from flask import Flask
 
+from settings import Config
 from yacut.utils import get_unique_short_id
 
-load_dotenv()
-
-API_HOST = os.environ.get("API_HOST", "https://cloud-api.yandex.net")
-API_VERSION = os.environ.get("API_VERSION", "/v1")
-DISK_TOKEN = os.environ.get("DISK_TOKEN", "mock_token")
-
-AUTH_HEADERS = {"Authorization": f"OAuth {DISK_TOKEN}"}
-
-UPLOAD_URL = f"{API_HOST}{API_VERSION}/disk/resources/upload"
-DOWNLOAD_URL = f"{API_HOST}{API_VERSION}/disk/resources/download"
-
-app = Flask(__name__)
+AUTH_HEADERS = {"Authorization": f"OAuth {Config.DISK_TOKEN}"}
+UPLOAD_URL = f"{Config.API_HOST}{Config.API_VERSION}/disk/resources/upload"
+DOWNLOAD_URL = f"{Config.API_HOST}{Config.API_VERSION}/disk/resources/download"
 
 
 async def upload_file_and_get_url(session, file):
@@ -27,9 +15,9 @@ async def upload_file_and_get_url(session, file):
     path = f"app:/{file.filename}"
 
     async with session.get(
-        UPLOAD_URL,
-        headers=AUTH_HEADERS,
-        params={"path": path, "overwrite": "true"},
+            UPLOAD_URL,
+            headers=AUTH_HEADERS,
+            params={"path": path, "overwrite": "true"},
     ) as resp:
         data = await resp.json()
         upload_href = data["href"]
@@ -41,7 +29,7 @@ async def upload_file_and_get_url(session, file):
             )
 
     async with session.get(
-        DOWNLOAD_URL, headers=AUTH_HEADERS, params={"path": path}
+            DOWNLOAD_URL, headers=AUTH_HEADERS, params={"path": path}
     ) as resp:
         data = await resp.json()
         direct_url = data["href"]
