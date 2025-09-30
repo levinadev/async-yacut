@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-
+from http import HTTPStatus
 from settings import Config
 from yacut.utils import get_unique_short_id
 
@@ -10,8 +10,7 @@ DOWNLOAD_URL = f"{Config.API_HOST}{Config.API_VERSION}/disk/resources/download"
 
 
 async def upload_file_and_get_url(session, file):
-    """Загрузить один файл на Яндекс.Диск
-    и вернуть короткую ссылку + прямую ссылку"""
+    """Загрузка файла на Яндекс.Диск"""
     path = f"app:/{file.filename}"
 
     async with session.get(
@@ -23,7 +22,7 @@ async def upload_file_and_get_url(session, file):
         upload_href = data["href"]
 
     async with session.put(upload_href, data=file.read()) as resp:
-        if resp.status not in (201, 202):
+        if resp.status not in (HTTPStatus.CREATED, HTTPStatus.ACCEPTED):
             raise Exception(
                 f"Ошибка загрузки файла {file.filename}, статус {resp.status}"
             )

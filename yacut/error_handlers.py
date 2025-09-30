@@ -1,31 +1,34 @@
 from flask import jsonify, render_template
+from http import HTTPStatus
 
 from . import app
 
 
-@app.errorhandler(404)
+@app.errorhandler(HTTPStatus.NOT_FOUND)
 def not_found_error(error):
     if "/api/" in str(error):
-        return jsonify({"message": "Ресурс не найден"}), 404
+        return (jsonify({"message": "Ресурс не найден"}),
+                HTTPStatus.NOT_FOUND)
     return (
         render_template(
             "404.html",
-            error_code=404,
+            error_code=HTTPStatus.NOT_FOUND,
             message="Страница не найдена",
         ),
-        404,
+        HTTPStatus.NOT_FOUND,
     )
 
 
-@app.errorhandler(500)
+@app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
 def internal_error(error):
     if "/api/" in str(error):
-        return jsonify({"message": "Внутренняя ошибка сервера"}), 500
+        return (jsonify({"message": "Внутренняя ошибка сервера"}),
+                HTTPStatus.INTERNAL_SERVER_ERROR)
     return (
         render_template(
             "500.html",
-            error_code=500,
+            error_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             message="Ошибка на сервере"
         ),
-        500,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
     )
