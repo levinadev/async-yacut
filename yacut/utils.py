@@ -1,8 +1,11 @@
 import random
-import string
+
+from constants import (
+    CUSTOM_ID_DEFAULT_LENGTH,
+    CUSTOM_ID_CHARACTERS
+)
 
 
-def get_unique_short_id(length=6):
+def get_unique_short_id(length=CUSTOM_ID_DEFAULT_LENGTH):
     """Генерация случайного короткого идентификатора."""
-    characters = string.ascii_letters + string.digits
-    return "".join(random.choices(characters, k=length))
+    return "".join(random.choices(CUSTOM_ID_CHARACTERS, k=length))

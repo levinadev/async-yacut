@@ -1,5 +1,4 @@
 import asyncio
-import re
 
 from flask import redirect, render_template, request, url_for
 
@@ -8,9 +7,11 @@ from .models import URLMap
 from .utils import get_unique_short_id
 from .yandex import async_upload_files_to_yandex
 
-ALLOWED_CUSTOM_ID = re.compile(r"^[A-Za-z0-9]+$")
-RESERVED_SHORTS = ["files", "api", "admin"]
-
+from constants import (
+    CUSTOM_ID_MAX_LENGTH,
+    CUSTOM_ID_ALLOWED_PATTERN,
+    CUSTOM_ID_RESERVED,
+)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -26,15 +27,15 @@ def index():
             )
 
         if custom_id:
-            if len(custom_id) > 16:
+            if len(custom_id) > CUSTOM_ID_MAX_LENGTH:
                 return render_template(
                     "index.html",
                     error=(
-                        "Длина короткой ссылки не "
-                        "должна превышать 16 символов."
+                        f"Длина короткой ссылки не "
+                        f"должна превышать {CUSTOM_ID_MAX_LENGTH} символов."
                     ),
                 )
-            if not ALLOWED_CUSTOM_ID.match(custom_id):
+            if not CUSTOM_ID_ALLOWED_PATTERN.match(custom_id):
                 return render_template(
                     "index.html",
                     error=(
@@ -46,7 +47,7 @@ def index():
             custom_id = get_unique_short_id()
 
         if (
-            custom_id in RESERVED_SHORTS
+            custom_id in CUSTOM_ID_RESERVED
             or URLMap.query.filter_by(short=custom_id).first()
         ):
             return render_template(
