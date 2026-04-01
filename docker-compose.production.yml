@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: .
+    container_name: yacut-backend
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "5000"
+    volumes:
+      - sqlite_data:/app/instance
+
+  nginx:
+    build: ./infra
+    container_name: yacut-proxy
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8011:80"
+
+volumes:
+  sqlite_data:
