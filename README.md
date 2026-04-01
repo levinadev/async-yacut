@@ -3,69 +3,30 @@
 Дополнительная функция YaCut — загрузка сразу нескольких файлов на Яндекс Диск и предоставление коротких ссылок пользователю для скачивания этих файлов.
 
 
-### Как запустить проект Yacut:
+### Запуск через Docker
 
-Клонировать репозиторий и перейти в него в командной строке:
-
-```
-git clone 
-```
+1. Создать файл `.env` из примера:
 
 ```
-cd yacut
+cp .env.example .env
 ```
 
-Cоздать и активировать виртуальное окружение:
+2. Запустить контейнеры:
 
 ```
-python3 -m venv venv
+docker compose -f docker-compose.production.yml up -d --build
 ```
 
-* Если у вас Linux/macOS
-
-    ```
-    source venv/bin/activate
-    ```
-
-* Если у вас windows
-
-    ```
-    source venv/scripts/activate
-    ```
-
-Установить зависимости из файла requirements.txt:
+3. Приложение будет доступно по адресу:
 
 ```
-python3 -m pip install --upgrade pip
+http://localhost:8011
 ```
 
-```
-pip install -r requirements.txt
-```
-
-Создать в директории проекта файл .env с четыремя переменными окружения:
+Остановка:
 
 ```
-FLASK_APP=yacut
-FLASK_DEBUG=1
-FLASK_ENV=development
-SECRET_KEY=your_secret_key
-DATABASE_URI=sqlite:///db.sqlite3
-DISK_TOKEN=y0__xDN_96sBxjWrzogouqTuBSC4j3rvDDBhWWEoMBG7Bbl1i82tw
-API_HOST=https://cloud-api.yandex.net/
-API_VERSION=v1
-```
-
-Создать базу данных и применить миграции:
-
-```
-flask db upgrade
-```
-
-Запустить проект:
-
-```
-flask run
+docker compose -f docker-compose.production.yml down
 ```
 
 

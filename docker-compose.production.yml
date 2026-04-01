@@ -1,0 +1,25 @@
+services:
+  backend:
+    image: annalevina/async_yacut_backend:latest
+    build: .
+    container_name: yacut-backend
+    restart: always
+    env_file:
+      - .env
+    expose:
+      - "5000"
+    volumes:
+      - sqlite_data:/app/instance
+
+  nginx:
+    image: annalevina/async_yacut_nginx:latest
+    build: ./infra
+    container_name: yacut-proxy
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8011:80"
+
+volumes:
+  sqlite_data:
